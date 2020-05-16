@@ -283,7 +283,7 @@ int main(int argc, char **argv)
     double samp_period_us = 0.0182592 * 1000;
 
     clock_gettime(CLOCK_REALTIME, &start_time);
-    int num_samples = 900000;
+    int num_samples = 200000;
     int samples[num_samples];
 
     while(i < num_samples) //Main Loop
@@ -299,7 +299,7 @@ int main(int argc, char **argv)
         /*bcm2835_pwm_set_data(1,input_signal & 0x1F);*/
         /*bcm2835_pwm_set_data(0,input_signal >> 5);*/
         i++;
-        /*usleep(samp_period_us);*/
+        usleep(samp_period_us);
     }
     
 

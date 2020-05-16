@@ -33,7 +33,7 @@ BLACK = 0,0,0
 SCREEN = None
 FONT = None
 SMALL_FONT = None
-BUTTONS = { 'Display Recordings':(160,90)}
+BUTTONS = { 'Display Recordings':(160,90),'QUIT':(160,120)}
 BUTTON_RECTS = {}
 HISTORY_Y_COORDINATES = [60, 100, 140, 180]
 FILES={}
@@ -204,61 +204,32 @@ def refresh_screen():
                 SCREEN.blit(text_surface, rect1)
             pygame.display.flip()
 
-"""def displayFiles(myFILES):
-
-    SCREEN.fill(BLACK)
-    for my_text, text_pos in myFILES.items():
-        #if PANIC and my_text == "STOP":
-           # my_text = "RESUME"
-        text_surface = FONT.render(my_text, True, WHITE)
-        rect1 = text_surface.get_rect(center=text_pos)
-        BUTTON_RECTS[my_text] = rect1
-        SCREEN.blit(text_surface, rect1)
-    pygame.display.flip()"""
-        
-            
-
-
 def detect_touch():
     global state
-    for event in pygame.event.get():
-        if(event.type is MOUSEBUTTONDOWN):
-            pos = pygame.mouse.get_pos()
-           # print("mousebottomdown")
-        elif(event.type is MOUSEBUTTONUP):
-            pos=pygame.mouse.get_pos()
-           # print("mousebottomup")
-            x,y = pos
+    if state==1 :
+        for event in pygame.event.get():
+            if(event.type is MOUSEBUTTONDOWN):
+                pos = pygame.mouse.get_pos()
+                # print("mousebottomdown")
+            elif(event.type is MOUSEBUTTONUP):
+                pos=pygame.mouse.get_pos()
+                # print("mousebottomup")
+                x,y = pos
 
             
-            for btn in BUTTON_RECTS:
-                #print(f"{btn}")
-                rect = BUTTON_RECTS[btn]
-                temp = rect.collidepoint(x,y)
-                print(f"{temp}")
-                if rect.collidepoint(x, y):
-                    '''position = 1
-                    with  os.scandir('wavs/') as entries:
-                            for entry in entries:
-                                data = {entry.name:(120,90+10*position)}
-                                position+=10
-                                FILES.update(data)'''
-                    #for key in FILES:
-                           # print(key)
-                   
-                   #displayFiles(FILES)
-                    
-                    #print(f"{x}{y} touched!")
-                    #print(PWM_SPEEDS)
-                
-                    if btn == "Display Recordings":
-                        state =2
-                        print("recordings on the screen")
-                        #print(f"{state}")
-                        #displayFiles(FILES)
-                    if btn == "QUIT":
-                        print("QUITTING")
-                        exit()
+                for btn in BUTTON_RECTS:
+                    #print(f"{btn}")
+                    rect = BUTTON_RECTS[btn]
+                    temp = rect.collidepoint(x,y)
+                    print(f"{temp}")
+                    if rect.collidepoint(x, y): 
+                        if btn == "Display Recordings":
+                            state =2
+                            print("recordings on the screen")
+                            #print(f"{state}")
+                        if btn == "QUIT":
+                            print("QUITTING")
+                            exit()
 
 def my_exit():
     #TODO: stop PWM?
