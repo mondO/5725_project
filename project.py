@@ -37,6 +37,7 @@ BUTTONS = { 'Display Recordings':(160,90)}
 BUTTON_RECTS = {}
 HISTORY_Y_COORDINATES = [60, 100, 140, 180]
 FILES={}
+FILES_RECTS ={}
 
 PANIC = False
 state =1
@@ -162,9 +163,10 @@ def draw_history(side):
         SCREEN.blit(text_surface, rect)
 
 
-def refresh_screen(state):
+def refresh_screen():
+    global state
     SCREEN.fill(BLACK)
-    print(f"{state}")
+    #print(f"{state}")
     # draw history
     #draw_history('Press to Record')
 
@@ -176,23 +178,31 @@ def refresh_screen(state):
             text_surface = FONT.render(my_text, True, WHITE)
             rect = text_surface.get_rect(center=text_pos)
             BUTTON_RECTS[my_text] = rect
+            #print(rect)
             SCREEN.blit(text_surface, rect)
         pygame.display.flip()
         
-        if (state==2):
-         position = 1
-         with  os.scandir('wavs/') as entries:
+    if (state==2):
+        #print("Instate 2")
+        position = 1
+        with  os.scandir('wavs/') as entries:
             for entry in entries:
-                data = {entry.name:{120,90+10*position}}
-                position+=1
+                print(entry.name)
+                data = {entry.name:(120,90+10*position)}
+                # FILES[entry.name] = (120, 90+10*position)
+                position+=5
                 FILES.update(data)
-
-         for my_text, text_pos in FILES.items():
-            text_surface = FONT.render(my_text, True, WHITE)
-            rect1 = text_surface.get_rect(center=text_pos)
-            BUTTON_RECTS[my_text] = rect1
-            SCREEN.blit(text_surface, rect1)
-         pygame.display.flip()
+            for key in FILES:
+                print(key)
+            for my_text, text_pos in FILES.items():
+                text_surface = FONT.render(my_text, True, WHITE)
+                #import pdb
+                #pdb.set_trace()
+                rect1 = text_surface.get_rect(center=text_pos)
+                #print(rect1)
+                FILES_RECTS[my_text] = rect1
+                SCREEN.blit(text_surface, rect1)
+            pygame.display.flip()
 
 """def displayFiles(myFILES):
 
@@ -210,7 +220,7 @@ def refresh_screen(state):
 
 
 def detect_touch():
-   # global PANIC
+    global state
     for event in pygame.event.get():
         if(event.type is MOUSEBUTTONDOWN):
             pos = pygame.mouse.get_pos()
@@ -227,12 +237,12 @@ def detect_touch():
                 temp = rect.collidepoint(x,y)
                 print(f"{temp}")
                 if rect.collidepoint(x, y):
-                    position = 1
+                    '''position = 1
                     with  os.scandir('wavs/') as entries:
                             for entry in entries:
-                                data = {entry.name:{120,90+10*position}}
-                                position+=1
-                                FILES.update(data)
+                                data = {entry.name:(120,90+10*position)}
+                                position+=10
+                                FILES.update(data)'''
                     #for key in FILES:
                            # print(key)
                    
@@ -244,7 +254,7 @@ def detect_touch():
                     if btn == "Display Recordings":
                         state =2
                         print("recordings on the screen")
-                        print(f"{state}")
+                        #print(f"{state}")
                         #displayFiles(FILES)
                     if btn == "QUIT":
                         print("QUITTING")
@@ -265,7 +275,7 @@ def main():
    # for _ , pwm in PWM_DICT.items():
       #  set_motor_speed(pwm, 0)
     while True:
-        refresh_screen(state)
+        refresh_screen()
 
         detect_touch()
         pass
