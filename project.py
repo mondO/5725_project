@@ -33,11 +33,13 @@ BLACK = 0,0,0
 SCREEN = None
 FONT = None
 SMALL_FONT = None
-BUTTONS = { 'REC':(160,90)}
+BUTTONS = { 'Display Recordings':(160,90)}
 BUTTON_RECTS = {}
 HISTORY_Y_COORDINATES = [60, 100, 140, 180]
+FILES={}
 
 PANIC = False
+state =1
 
 def gpio_callback(channel):
     print("edge detected on {}, command {}".format(channel, IN_CHANNELS[channel]))
@@ -105,7 +107,7 @@ def setup_pygame():
     global SCREEN 
     SCREEN = pygame.display.set_mode((320, 240))
     global FONT, SMALL_FONT
-    FONT = pygame.font.Font(None, 60)
+    FONT = pygame.font.Font(None, 30)
     SMALL_FONT = pygame.font.Font(None, 20)
     
 
@@ -160,21 +162,52 @@ def draw_history(side):
         SCREEN.blit(text_surface, rect)
 
 
-def refresh_screen():
+def refresh_screen(state):
     SCREEN.fill(BLACK)
-    
+    print(f"{state}")
     # draw history
-    draw_history('Press to Record')
+    #draw_history('Press to Record')
 
     # draw buttons
-    for my_text, text_pos in BUTTONS.items():
+    if (state==1):
+        for my_text, text_pos in BUTTONS.items():
+        #if PANIC and my_text == "STOP":
+           # my_text = "RESUME"
+            text_surface = FONT.render(my_text, True, WHITE)
+            rect = text_surface.get_rect(center=text_pos)
+            BUTTON_RECTS[my_text] = rect
+            SCREEN.blit(text_surface, rect)
+        pygame.display.flip()
+        
+        if (state==2):
+         position = 1
+         with  os.scandir('wavs/') as entries:
+            for entry in entries:
+                data = {entry.name:{120,90+10*position}}
+                position+=1
+                FILES.update(data)
+
+         for my_text, text_pos in FILES.items():
+            text_surface = FONT.render(my_text, True, WHITE)
+            rect1 = text_surface.get_rect(center=text_pos)
+            BUTTON_RECTS[my_text] = rect1
+            SCREEN.blit(text_surface, rect1)
+         pygame.display.flip()
+
+"""def displayFiles(myFILES):
+
+    SCREEN.fill(BLACK)
+    for my_text, text_pos in myFILES.items():
         #if PANIC and my_text == "STOP":
            # my_text = "RESUME"
         text_surface = FONT.render(my_text, True, WHITE)
-        rect = text_surface.get_rect(center=text_pos)
-        BUTTON_RECTS[my_text] = rect
-        SCREEN.blit(text_surface, rect)
-    pygame.display.flip()
+        rect1 = text_surface.get_rect(center=text_pos)
+        BUTTON_RECTS[my_text] = rect1
+        SCREEN.blit(text_surface, rect1)
+    pygame.display.flip()"""
+        
+            
+
 
 def detect_touch():
    # global PANIC
@@ -194,12 +227,25 @@ def detect_touch():
                 temp = rect.collidepoint(x,y)
                 print(f"{temp}")
                 if rect.collidepoint(x, y):
-                    print(f"{x}{y} touched!")
+                    position = 1
+                    with  os.scandir('wavs/') as entries:
+                            for entry in entries:
+                                data = {entry.name:{120,90+10*position}}
+                                position+=1
+                                FILES.update(data)
+                    #for key in FILES:
+                           # print(key)
+                   
+                   #displayFiles(FILES)
+                    
+                    #print(f"{x}{y} touched!")
                     #print(PWM_SPEEDS)
                 
-                    if btn == "REC":
-                        print("Recording Audio")
-                            #recordAudio()
+                    if btn == "Display Recordings":
+                        state =2
+                        print("recordings on the screen")
+                        print(f"{state}")
+                        #displayFiles(FILES)
                     if btn == "QUIT":
                         print("QUITTING")
                         exit()
@@ -214,11 +260,12 @@ def main():
    # setup_pins()
     atexit.register(my_exit)
     setup_pygame()
-
+    #global state  #Home screen "Display recordings"
+    #state =1
    # for _ , pwm in PWM_DICT.items():
       #  set_motor_speed(pwm, 0)
     while True:
-        refresh_screen()
+        refresh_screen(state)
 
         detect_touch()
         pass
