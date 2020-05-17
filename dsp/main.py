@@ -7,6 +7,12 @@ import copy
 from pygame.locals import * # for event MOUSE variables
 from enum import Enum, auto
 
+import numpy as np
+import scipy.io.wavfile
+import scipy.signal
+import matplotlib.pyplot as plt
+import wavio
+
 class St(Enum):
     MAIN       = auto()
     BROWSE     = auto()
@@ -40,10 +46,14 @@ file_page_size = 4
 
 
 
+
 DSP_BUTTONS = {
-    (190, 90) : 'FOO',
-    (160, 90) : 'BAR',
+    (80, 200) : 'BACK',
+    (160, 200) : 'PLAY',
+    (240, 200) : 'UNCLIP',
 }
+image = None
+
 
 # k,v = coordinate tuple, reference to pygame rectangle for button
 # contents of this gets cleared every time we transition states
@@ -56,6 +66,36 @@ BLACK = 0,0,0
 SCREEN = None
 FONT = None
 SMALL_FONT = None
+
+
+def get_image(path):
+        global _image_library
+        image = _image_library.get(path)
+        if image == None:
+                canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep)
+                image = pygame.image.load(canonicalized_path)
+                _image_library[path] = image
+        return image
+
+
+
+def enter_dsp(filename):
+    my_wavio = wavio.read(f'../wavs/{filename}')
+
+    samples = np.array(my_wavio.data)
+    samples = samples + (-1 * np.min(samples))
+    num_samples = len(samples)
+
+    clipped = np.copy(samples)
+    clipped = clipped/np.max(clipped)
+    clipped[clipped < 5e-19] = 0
+    plt.axis('off')
+    plt.plot(clipped)
+    plt.savefig('foo.png', bbox_inches='tight', transparent=False)
+    global image
+    image = pygame.image.load('foo.png')
+    image = pygame.transform.scale(image, (280, int(480/5)))
+
 
 def detect_touch(current_state):
     global BUTTON_RECTS, MY_STATE, file_page_num
@@ -92,7 +132,7 @@ def detect_touch(current_state):
             if touched == 'BROWSE':
                 MY_STATE = St.BROWSE
             elif touched == 'QUIT':
-                system.exit(0)
+                exit(0)
         elif current_state == St.BROWSE:
             if touched == 'BACK':
                 MY_STATE = St.MAIN
@@ -102,6 +142,13 @@ def detect_touch(current_state):
             elif touched == 'NEXT':
                 if len(file_list) - (file_page_num + 1) * 4 > 0:
                     file_page_num += 1
+            else:
+                # here, touched is a filename
+                enter_dsp(touched)
+                MY_STATE = St.DSP
+        elif current_state == St.DSP:
+            if touched == 'BACK':
+                MY_STATE = St.BROWSE
 
     # TODO: do stuff after detecting a touch (depending on state)
 
@@ -142,9 +189,13 @@ def draw_screen(current_state):
             if file_i < len(shown_files):
                 text_surface = FONT.render(shown_files[file_i], True, WHITE)
                 rect = text_surface.get_rect(center=coor)
+                BROWSE_FILE_BUTTONS[coor] = shown_files[file_i]
                 BUTTON_RECTS[coor] = rect
                 SCREEN.blit(text_surface, rect)
                 file_i += 1
+
+    if current_state == St.DSP:
+        SCREEN.blit(image, (20, 20))
         
     
     pygame.display.flip()
