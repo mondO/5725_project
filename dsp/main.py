@@ -53,6 +53,7 @@ DSP_BUTTONS = {
     (240, 200) : 'UNCLIP',
 }
 image = None
+wav_filename = None
 
 
 # k,v = coordinate tuple, reference to pygame rectangle for button
@@ -89,13 +90,59 @@ def enter_dsp(filename):
     clipped = np.copy(samples)
     clipped = clipped/np.max(clipped)
     clipped[clipped < 5e-19] = 0
+    plt.clf()
     plt.axis('off')
     plt.plot(clipped)
-    plt.savefig('foo.png', bbox_inches='tight', transparent=False)
+    plt.savefig('foo.png', bbox_inches='tight', transparent=True)
     global image
     image = pygame.image.load('foo.png')
     image = pygame.transform.scale(image, (280, int(480/5)))
+    wavio.write("foo.wav", clipped, my_wavio.rate, sampwidth=3) 
 
+def unclip (filename):
+    my_wavio = wavio.read('../wavs/mono-32bit.wav')
+
+    samples = np.array(my_wavio.data)
+    samples = samples + (-1 * np.min(samples))
+    num_samples = len(samples)
+
+    clipped = np.copy(samples)
+    clipped = clipped/np.max(clipped)
+    clipped[clipped < 5e-19] = 0
+
+    unclipped = np.zeros(clipped.shape)
+    start = False
+    i = 0
+    while i < len(clipped):
+        if i < len(clipped) and clipped[i] > 0 or not start:
+            unclipped[i] = clipped[i]
+            i += 1
+            if(i < len(clipped) and clipped[i] > 0):
+                start = True
+            continue
+        else:
+            mirror_begin = i
+            mirror_i = 0
+            mirror = -clipped[mirror_begin - mirror_i]
+            unclipped[i] = mirror
+            mirror_i +=1
+            mirror = -clipped[mirror_begin - mirror_i]
+            i+=1
+            while i < len(clipped) and mirror < 0 and clipped[i] <= 0:
+                unclipped[i] = mirror
+                mirror_i +=1
+                mirror = -clipped[mirror_begin - mirror_i]
+                i+=1
+
+    plt.clf()
+    plt.axis('off')
+    plt.plot(unclipped)
+    plt.savefig('foo.png', bbox_inches='tight', transparent=True)
+    
+    global image
+    image = pygame.image.load('foo.png')
+    image = pygame.transform.scale(image, (280, int(480/5)))
+    wavio.write("foo.wav", unclipped, my_wavio.rate, sampwidth=3)
 
 def detect_touch(current_state):
     global BUTTON_RECTS, MY_STATE, file_page_num
@@ -145,10 +192,14 @@ def detect_touch(current_state):
             else:
                 # here, touched is a filename
                 enter_dsp(touched)
+                global wav_filename
+                wav_filename = touched
                 MY_STATE = St.DSP
         elif current_state == St.DSP:
             if touched == 'BACK':
                 MY_STATE = St.BROWSE
+            elif touched == 'UNCLIP':
+                unclip(wav_filename)
 
     # TODO: do stuff after detecting a touch (depending on state)
 
