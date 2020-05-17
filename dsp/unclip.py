@@ -55,8 +55,9 @@ while i < len(clipped):
     # if sample == 0 and sample_i > 0:
         # clipped[sample_i] = clipped[sample_i - 1] * -1
 
-plt.plot(unclipped)
-print(clipped)
+fig, ax = plt.subplots(1,2)
+ax[0].plot(clipped)
+ax[1].plot(unclipped)
 
 plt.show()
 
