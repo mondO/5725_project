@@ -33,11 +33,13 @@ BLACK = 0,0,0
 SCREEN = None
 FONT = None
 SMALL_FONT = None
-BUTTONS = { 'Display Recordings':(160,90),'QUIT':(160,120)}
+BUTTONS = { 'Display Recordings':(160,90)}
 BUTTON_RECTS = {}
 HISTORY_Y_COORDINATES = [60, 100, 140, 180]
 FILES={}
 FILES_RECTS ={}
+TRANSITION ={'Fix Audio':(160,90),'Go Back':(160,120),'Home Screen':(160,140)}
+TRANSITION_RECTS ={}
 
 PANIC = False
 state =1
@@ -187,22 +189,40 @@ def refresh_screen():
         position = 1
         with  os.scandir('wavs/') as entries:
             for entry in entries:
-                print(entry.name)
+                #print(entry.name)
                 data = {entry.name:(120,90+10*position)}
                 # FILES[entry.name] = (120, 90+10*position)
                 position+=5
                 FILES.update(data)
-            for key in FILES:
-                print(key)
+            #for key in FILES:
+                #print(key)
             for my_text, text_pos in FILES.items():
                 text_surface = FONT.render(my_text, True, WHITE)
                 #import pdb
                 #pdb.set_trace()
                 rect1 = text_surface.get_rect(center=text_pos)
-                #print(rect1)
                 FILES_RECTS[my_text] = rect1
                 SCREEN.blit(text_surface, rect1)
             pygame.display.flip()
+
+    if state ==3:
+        #display plot --------- HOW????????
+        for my_text, text_pos in TRANSITION.items():
+                text_surface = FONT.render(my_text, True, WHITE)
+                #import pdb
+                #pdb.set_trace()
+                rect1 = text_surface.get_rect(center=text_pos)
+                TRANSITION_RECTS[my_text] = rect1
+                SCREEN.blit(text_surface, rect1)
+        pygame.display.flip()
+
+    if state ==4:
+        #display fixed audio
+        text_surface= FONT.render('Home Screen',True,WHITE)
+        rect = text_surface.get_rect(center = (120,90))
+        SCREEN.blit(text_surface,rect)
+        pygame.display.flip()
+
 
 def detect_touch():
     global state
@@ -215,21 +235,87 @@ def detect_touch():
                 pos=pygame.mouse.get_pos()
                 # print("mousebottomup")
                 x,y = pos
-
-            
                 for btn in BUTTON_RECTS:
                     #print(f"{btn}")
                     rect = BUTTON_RECTS[btn]
                     temp = rect.collidepoint(x,y)
-                    print(f"{temp}")
+                    #print(f"{temp}")
                     if rect.collidepoint(x, y): 
                         if btn == "Display Recordings":
                             state =2
-                            print("recordings on the screen")
+                            #print("recordings on the screen")
                             #print(f"{state}")
                         if btn == "QUIT":
                             print("QUITTING")
                             exit()
+    elif state ==2:
+        for event in pygame.event.get():
+            if(event.type is MOUSEBUTTONDOWN):
+                pos = pygame.mouse.get_pos()
+                # print("mousebottomdown")
+            elif(event.type is MOUSEBUTTONUP):
+                pos=pygame.mouse.get_pos()
+                # print("mousebottomup")
+                x,y = pos
+
+            
+                for btn in FILES_RECTS:
+                    #print(f"{btn}")
+                    rect = FILES_RECTS[btn]
+                    #temp = rect.collidepoint(x,y)
+                    #print(f"{temp}")
+                    if rect.collidepoint(x, y): 
+                        state =3
+                        print(f"Displaying {btn} file ")
+                        #print(f"{state}")
+    elif state ==3:
+         for event in pygame.event.get():
+            if(event.type is MOUSEBUTTONDOWN):
+                pos = pygame.mouse.get_pos()
+                # print("mousebottomdown")
+            elif(event.type is MOUSEBUTTONUP):
+                pos=pygame.mouse.get_pos()
+                # print("mousebottomup")
+                x,y = pos
+                for btn in TRANSITION_RECTS:
+                    #print(f"{btn}")
+                    rect = TRANSITION_RECTS[btn]
+                    #temp = rect.collidepoint(x,y)
+                    #print(f"{temp}")
+                    if rect.collidepoint(x, y): 
+                        if btn =="Go Back":
+                            state =2
+                        if btn == "Home Screen":
+                            state =1
+                            #print("recordings on the screen")
+                            #print(f"{state}")
+                        if btn == "Fix Audio":
+                            #print("Fix Audio")
+                            state =4
+                            #call audio fixing function here
+
+
+    elif state ==4:
+         for event in pygame.event.get():
+            if(event.type is MOUSEBUTTONDOWN):
+                pos = pygame.mouse.get_pos()
+                # print("mousebottomdown")
+            elif(event.type is MOUSEBUTTONUP):
+                pos=pygame.mouse.get_pos()
+                # print("mousebottomup")
+                x,y = pos
+                for btn in TRANSITION_RECTS:
+                    #print(f"{btn}")
+                    rect = TRANSITION_RECTS[btn]
+                    #temp = rect.collidepoint(x,y)
+                    #print(f"{temp}")
+                    if rect.collidepoint(x, y): 
+                        if btn == "Home Screen":
+                            state =1
+                            #print("recordings on the screen")
+                            #print(f"{state}")
+                        
+
 
 def my_exit():
     #TODO: stop PWM?

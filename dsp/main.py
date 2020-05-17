@@ -12,6 +12,7 @@ import scipy.io.wavfile
 import scipy.signal
 import matplotlib.pyplot as plt
 import wavio
+from playsound import playsound
 
 class St(Enum):
     MAIN       = auto()
@@ -43,7 +44,6 @@ BROWSE_UI_BUTTONS = {
 file_list = ['a', 'b', 'c', 'd', 'e']
 file_page_num = 0
 file_page_size = 4
-
 
 
 
@@ -97,10 +97,11 @@ def enter_dsp(filename):
     global image
     image = pygame.image.load('foo.png')
     image = pygame.transform.scale(image, (280, int(480/5)))
-    wavio.write("foo.wav", clipped, my_wavio.rate, sampwidth=3) 
+    # to_wav = scipy.signal.resample(clipped, int(num_samples * (441000/my_wavio.rate)))
+    wavio.write("foo.wav", clipped, my_wavio.rate, sampwidth=3)
 
 def unclip (filename):
-    my_wavio = wavio.read('../wavs/mono-32bit.wav')
+    my_wavio = wavio.read(f'../wavs/{filename}')
 
     samples = np.array(my_wavio.data)
     samples = samples + (-1 * np.min(samples))
@@ -142,6 +143,8 @@ def unclip (filename):
     global image
     image = pygame.image.load('foo.png')
     image = pygame.transform.scale(image, (280, int(480/5)))
+
+    # to_wav = scipy.signal.resample(unclipped, int(num_samples * (441000/my_wavio.rate)))
     wavio.write("foo.wav", unclipped, my_wavio.rate, sampwidth=3)
 
 def detect_touch(current_state):
@@ -200,6 +203,11 @@ def detect_touch(current_state):
                 MY_STATE = St.BROWSE
             elif touched == 'UNCLIP':
                 unclip(wav_filename)
+            elif touched == 'PLAY':
+                os.system('aplay ./foo.wav')
+                # pygame.mixer.init()
+                # pygame.mixer.music.load("./foo.wav")
+                # pygame.mixer.music.play()
 
     # TODO: do stuff after detecting a touch (depending on state)
 

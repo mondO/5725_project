@@ -9,22 +9,11 @@
 #include <math.h>
 
 // Define Input Pins
-#define PUSH1 			RPI_GPIO_P1_08  	//GPIO14
-#define PUSH2 			RPI_V2_GPIO_P1_38  	//GPIO20 
-#define TOGGLE_SWITCH 	RPI_V2_GPIO_P1_32 	//GPIO12
-#define FOOT_SWITCH 	RPI_GPIO_P1_10 		//GPIO15
-#define LED   			RPI_V2_GPIO_P1_36 	//GPIO16
 #define BILLION  1000000000.0
 
 
-uint32_t read_timer=0;
 uint32_t input_signal=0;
  
-uint8_t FOOT_SWITCH_val;
-uint8_t TOGGLE_SWITCH_val;
-uint8_t PUSH1_val;
-uint8_t PUSH2_val;
-
 int isBigEndian() {
     int test = 1;
     char *p = (char*)&test;
