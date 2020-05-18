@@ -214,7 +214,7 @@ void waveToFile( Wave* wave, const char* filename ){
     toLittleEndian(sizeof(int), (void*)&(wave->header.subChunk2Size));
 }
 
-void write_samples_to_file(int* samples, int nSamples, float sampleRate, float duration) {
+void write_samples_to_file(char* filename, int* samples, int nSamples, float sampleRate, float duration) {
     // convert all samples from [0,1024] int to (-1.0, 1.0) floats
     float sample_floats[nSamples];
     int i;
@@ -233,7 +233,7 @@ void write_samples_to_file(int* samples, int nSamples, float sampleRate, float d
         waveAddSample( &mySound, frameData );
     }
     // Write it to a file and clean up when done
-    waveToFile( &mySound, "mono-32bit.wav");
+    waveToFile( &mySound, filename);
     waveDestroy( &mySound );
 }
 
@@ -299,7 +299,15 @@ int main(int argc, char **argv)
     double rate = ((double) num_samples) / time_used;
     printf("%d samples collected in %f seconds: rate of %f", num_samples, time_used, rate);
     
-    write_samples_to_file(samples, num_samples, rate, time_used); 
+    char *fname;
+    if (argc > 1) 
+        fname = argv[1];
+    else
+        fname = "record.wav";
+
+    printf(fname);
+
+    write_samples_to_file(fname, samples, num_samples, rate, time_used); 
  
 	//close all and exit
 	bcm2835_spi_end();

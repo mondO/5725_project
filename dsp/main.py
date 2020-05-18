@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import atexit
 import os
 import pygame
@@ -23,6 +24,7 @@ MY_STATE = St.MAIN
 
 
 MAIN_BUTTONS = {
+    (160, 50) : 'RECORD',
     (160, 90) : 'BROWSE',
     (160, 130) : 'QUIT',
 }
@@ -148,7 +150,7 @@ def unclip (filename):
     wavio.write("foo.wav", unclipped, my_wavio.rate, sampwidth=3)
 
 def detect_touch(current_state):
-    global BUTTON_RECTS, MY_STATE, file_page_num
+    global BUTTON_RECTS, MY_STATE, file_page_num, MAIN_BUTTONS, file_list
     label_dict = None
     
     if current_state == St.MAIN:
@@ -181,6 +183,19 @@ def detect_touch(current_state):
         if current_state == St.MAIN:
             if touched == 'BROWSE':
                 MY_STATE = St.BROWSE
+            elif touched == 'RECORD':
+                MAIN_BUTTONS[(160, 50)] = 'RECORDING...'
+                draw_screen(MY_STATE)
+                
+                now = datetime.now()
+                date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+                os.system(f'sudo ../build/record ../wavs/{date_time}_rec.wav')
+                file_list = get_wavs()
+
+                
+                MAIN_BUTTONS[(160, 50)] = 'RECORD'
+                draw_screen(MY_STATE)
+
             elif touched == 'QUIT':
                 exit(0)
         elif current_state == St.BROWSE:
