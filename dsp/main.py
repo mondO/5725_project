@@ -66,6 +66,7 @@ BUTTON_RECTS = {}
 #Pygame globals
 WHITE = 255, 255, 255
 BLACK = 0,0,0
+BG = pygame.image.load("bg.jpg")
 SCREEN = None
 FONT = None
 SMALL_FONT = None
@@ -246,6 +247,8 @@ def draw_screen(current_state):
         assert False, "Invalid state"
 
     SCREEN.fill(BLACK)
+    if current_state != St.DSP:
+        SCREEN.blit(BG, (0, 0))
     for coor, label in label_dict.items():
         text_surface = FONT.render(label, True, WHITE)
         rect = text_surface.get_rect(center=coor)
@@ -296,6 +299,7 @@ def get_wavs():
     for file in os.listdir("../wavs"):
         if file.endswith(".wav"):
             wav_list.append(str(file))
+    wav_list.sort()
     return wav_list
 
 
@@ -305,6 +309,7 @@ def main():
 
     MY_STATE = St.MAIN
     file_list = get_wavs()
+
     
     while True:
         draw_screen(MY_STATE)
